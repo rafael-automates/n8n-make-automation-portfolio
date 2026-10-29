@@ -20,4 +20,7 @@ A submitted form becomes a fully linked CRM record with a follow-up task in seco
 No duplicate-contact check. A retry after a timeout could create a duplicate record.
 
 ## Screenshots
-Add to `screenshots/`: workflow canvas, form, resulting deal, Telegram alert.
+![Form](screenshots/Form.png)
+![Resulting Deal](screenshots/Resulting-Deal.png)
+![Telegram Alert](screenshots/Telegram-Alert.png)
+![Workflow Canvas](screenshots/Workflow-Canvas.png)
