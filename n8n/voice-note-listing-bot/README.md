@@ -20,4 +20,5 @@ One voice note returns publish-ready copy in the same chat.
 Accuracy depends on audio quality. Copy is not fact-checked against the property record.
 
 ## Screenshots
-Add to `screenshots/`: canvas, chat example.
+![Canvas](screenshots/canvas.png)
+![Chat](screenshots/chat-example.png)
