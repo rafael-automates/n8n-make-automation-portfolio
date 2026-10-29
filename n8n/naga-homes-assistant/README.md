@@ -22,4 +22,4 @@ Runs only while my machine and tunnel are up. Labels are a simple rule, not a va
 ## Screenshots
 ![Airtable Record](screenshots/Airtable-record.png)
 ![Conversation](screenshots/Conversation.png)
-![Hot Alert](screenshots/Hot-alert.png)
+![Hot Alert](screenshots/Hot-Alert.png)
