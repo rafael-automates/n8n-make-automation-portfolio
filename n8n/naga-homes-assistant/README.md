@@ -20,4 +20,6 @@ Inquiries are answered instantly and qualified leads land in Airtable with a pri
 Runs only while my machine and tunnel are up. Labels are a simple rule, not a validated score.
 
 ## Screenshots
-Add to `screenshots/`: conversation, Airtable record, Hot alert.
+![Airtable Record](screenshots/Airtable-record.png)
+![Conversation](screenshots/Conversation.png)
+![Hot Alert](screenshots/Hot-alert.png)
