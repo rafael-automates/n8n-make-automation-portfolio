@@ -20,4 +20,7 @@ A won deal produces a ready-to-use onboarding workspace with no manual setup.
 Folder names come from the organization name; duplicates are not checked. See the [SOP](SOP.md).
 
 ## Screenshots
-Add to `screenshots/`: canvas, ClickUp folder and tasks.
+![Canvas](screenshots/canvas.png)
+![Clickup Folder](screenshots/clickup-folder.png)
+![Tasks](screenshots/tasks.png)
+
