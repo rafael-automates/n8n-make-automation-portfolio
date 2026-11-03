@@ -10,6 +10,7 @@ Portfolio projects built for simulated clients (not paid client work). Each buil
 | [Voice-Note Listing Bot](n8n/voice-note-listing-bot) | n8n, Telegram, Groq (Whisper + LLM) | Published and tested |
 | [Global Error Handler](n8n/global-error-handler) | n8n, Telegram, Google Sheets | Tested with a deliberate failure |
 | [Shopify Abandoned Cart Recovery](make/shopify-cart-recovery) | Make, Shopify dev store, Groq, Gmail, Google Sheets | Real dev-store checkout webhook, test checkouts only |
+| [AI Real Estate Inquiry Triage Agent](make/ai-inquiry-triage) | Make, Gmail, Groq, Google Sheets, Slack | Tested with sample inquiry emails |
 
 Other Make scenarios (lead follow-up, onboarding, invoice intake, AI inquiry triage, dashboard) are described in the case study PDFs: https://drive.google.com/drive/folders/1n9clnJjOrgrulIw-aEedwhg27_hazmpA?usp=sharing
 
