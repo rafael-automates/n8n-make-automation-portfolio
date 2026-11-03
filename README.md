@@ -11,8 +11,10 @@ Portfolio projects built for simulated clients (not paid client work). Each buil
 | [Global Error Handler](n8n/global-error-handler) | n8n, Telegram, Google Sheets | Tested with a deliberate failure |
 | [Shopify Abandoned Cart Recovery](make/shopify-cart-recovery) | Make, Shopify dev store, Groq, Gmail, Google Sheets | Real dev-store checkout webhook, test checkouts only |
 | [AI Real Estate Inquiry Triage Agent](make/ai-inquiry-triage) | Make, Gmail, Groq, Google Sheets, Slack | Tested with sample inquiry emails |
+| [Invoice Extractor](n8n/invoice-extractor) | n8n, Gemini API, Google Sheets, Telegram | Tested on 10 fake invoices |
+| [Client Onboarding Automation](make/client-onboarding) | Make, Google Forms, Drive, Docs, Gmail, Calendar, Groq | Tested with test submissions |
 
-Other Make scenarios (lead follow-up, onboarding, invoice intake, AI inquiry triage, dashboard) are described in the case study PDFs: https://drive.google.com/drive/folders/1n9clnJjOrgrulIw-aEedwhg27_hazmpA?usp=sharing
+Other Make scenarios (lead follow-up, invoice intake, AI inquiry triage, dashboard) are described in the case study PDFs: https://drive.google.com/drive/folders/1n9clnJjOrgrulIw-aEedwhg27_hazmpA?usp=sharing
 
 Portfolio site: https://rafael-automates.github.io
 
