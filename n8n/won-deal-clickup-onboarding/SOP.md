@@ -1,6 +1,6 @@
 # SOP: Won Deal to ClickUp Onboarding
 
-**Owner:** YOUR NAME | **Last updated:** DATE
+**Owner:** Rafael John M. Malubag | **Last updated:** 11/3/2026
 
 ## 1. Purpose
 Create a ClickUp onboarding workspace automatically when a Pipedrive deal is won.
