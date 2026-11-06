@@ -1,0 +1,275 @@
+{
+  "name": "Lead Intake to Pipedrive",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Lead Intake",
+        "formDescription": "Tell us about your project and we'll be in touch.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What do you need help with?",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "lead_source"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -144,
+        -368
+      ],
+      "id": "a0eec0a4-8b37-4208-a97e-8deddcb3300f",
+      "name": "On form submission",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "name": "={{ $json.Company }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -368
+      ],
+      "id": "19e37aca-5fde-4639-a9d0-929522047ec3",
+      "name": "Create an organization",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "name": "={{ $('On form submission').item.json['Full Name'] }}",
+        "additionalFields": {
+          "emails": {
+            "emailProperties": [
+              {
+                "value": "={{ $('On form submission').item.json.Email }}"
+              }
+            ]
+          },
+          "org_id": "={{ $json.id }}",
+          "phones": {
+            "phoneProperties": [
+              {
+                "value": "={{ $('On form submission').item.json.Phone }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -368
+      ],
+      "id": "9014c7f3-0c7f-4591-aafe-2b9e2ed1e81d",
+      "name": "Create a person",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ $('On form submission').item.json.Company }} - {{ $('On form submission').item.json['What do you need help with?'] }}",
+        "org_id": "={{ $json.org_id }}",
+        "additionalFields": {
+          "person_id": "={{ $json.id }}",
+          "customFields": {
+            "property": [
+              {
+                "name": "Lead Source",
+                "value": "={{ $('On form submission').item.json.lead_source || 'unknown' }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -144
+      ],
+      "id": "7d0cc9e5-09f6-436a-a941-26bba0adbedf",
+      "name": "Create a deal",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "subject": "=Follow up with {{ $('On form submission').item.json['Full Name'] }}",
+        "type": "call",
+        "additionalFields": {
+          "deal_id": "={{ $json.id }}",
+          "due_date": "={{ $now.plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+          "org_id": "={{ $json.org_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -144
+      ],
+      "id": "4a254bd6-f827-487b-a1ad-370a1df3a85b",
+      "name": "Create an activity",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=New lead in Pipedrive: {{ $('On form submission').item.json['Full Name'] }} from {{ $('On form submission').item.json.Company }}    \nNeeds: {{ $('On form submission').item.json['What do you need help with?'] }}    \nPhone: {{ $('On form submission').item.json.Phone }}\nSource: {{ $('On form submission').item.json.lead_source || 'unknown' }}\nFollow-up due: {{ $json.due_date }}\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "f13cf20e-a92a-4229-9b95-edfa812d5bb3",
+      "name": "Send a text message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Create an organization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an organization": {
+      "main": [
+        [
+          {
+            "node": "Create a person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a person": {
+      "main": [
+        [
+          {
+            "node": "Create a deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a deal": {
+      "main": [
+        [
+          {
+            "node": "Create an activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an activity": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "k8mEeaeuF5xn3RA9",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "0943b9bb-be3f-42cc-80a9-e9cf8be6c002",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "cdOxSjj8eP5fMUp7",
+  "tags": []
+}
