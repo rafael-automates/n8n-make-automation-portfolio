@@ -1,0 +1,56 @@
+file,product_code,product,quantity,unit_cost,line_total
+invoice_01.pdf,PR101,Bananas 18kg box,4,14.50,58.00
+invoice_01.pdf,PR214,Cherry Tomatoes 6x250g,10,8.20,82.00
+invoice_01.pdf,PR330,Red Onions 10kg sack,3,9.75,29.25
+invoice_01.pdf,PR412,Baby Spinach 12x200g,5,11.40,57.00
+invoice_02.pdf,MLK4,Whole Milk 4 pint (case of 6),20,5.10,102.00
+invoice_02.pdf,MLK2,Semi-Skimmed Milk 2 pint (case of 12),15,7.45,111.75
+invoice_02.pdf,CHD5,Mature Cheddar 5kg block,6,28.90,173.40
+invoice_02.pdf,YOG8,Natural Yoghurt 8x150g,12,3.95,47.40
+invoice_02.pdf,BTR2,Salted Butter 250g (case of 20),4,32.00,128.00
+invoice_03.pdf,,White Sliced Loaf 800g,60,0.74,44.40
+invoice_03.pdf,,Seeded Batch Loaf 800g,36,1.12,40.32
+invoice_03.pdf,,Croissants 6 pack,24,1.45,34.80
+invoice_03.pdf,,Hot Cross Buns 4 pack,30,0.96,28.80
+invoice_03.pdf,,Sourdough Boule 600g,18,1.58,28.44
+invoice_03.pdf,,Plain Flour 16kg sack,2,15.80,31.60
+invoice_04.pdf,CL330,Cola 330ml can x24,40,6.80,272.00
+invoice_04.pdf,OJ1L,Orange Juice 1L x12,25,9.60,240.00
+invoice_04.pdf,WT500,Still Water 500ml x24,50,3.90,195.00
+invoice_04.pdf,SP2L,Sparkling Water 2L x6,30,4.75,142.50
+invoice_04.pdf,EN250,Energy Drink 250ml x24,16,19.20,307.20
+invoice_05.pdf,K1021,Basmati Rice 10kg,8,17.90,143.20
+invoice_05.pdf,K1033,Long Grain Rice 5kg,10,6.35,63.50
+invoice_05.pdf,K1105,Rapeseed Oil 20L,3,31.50,94.50
+invoice_05.pdf,K1118,Sunflower Oil 5L (case of 3),6,18.75,112.50
+invoice_05.pdf,K1240,Chopped Tomatoes 400g x12,20,5.40,108.00
+invoice_05.pdf,K1251,Baked Beans 415g x24,12,10.80,129.60
+invoice_05.pdf,K1302,Tea Bags 1100 pack,9,11.95,107.55
+invoice_05.pdf,K1310,Instant Coffee 750g,6,14.60,87.60
+invoice_05.pdf,K1422,Sugar 5kg,14,4.70,65.80
+invoice_05.pdf,K1431,Plain Pasta 3kg,11,4.15,45.65
+invoice_05.pdf,K1517,Kitchen Roll 12 pack,16,6.25,100.00
+invoice_05.pdf,K1522,Bin Liners 100 pack,10,5.85,58.50
+invoice_06.pdf,OL5,Extra Virgin Olive Oil 5L,12,24.30,291.60
+invoice_06.pdf,PS2,Passata 680g x12,18,9.80,176.40
+invoice_06.pdf,DP1,Dried Pasta 500g x20,25,11.40,285.00
+invoice_06.pdf,AN3,Anchovy Fillets 700g,8,13.95,111.60
+invoice_07.jpg,F210,Garden Peas 2.5kg,12,4.35,52.20
+invoice_07.jpg,F218,Sweetcorn 2.5kg,10,4.10,41.00
+invoice_07.jpg,F305,Fish Fingers 120 pack,5,21.80,109.00
+invoice_07.jpg,F411,Oven Chips 2.5kg,14,3.95,55.30
+invoice_07.jpg,F502,Vanilla Ice Cream 4L,9,6.70,60.30
+invoice_08.jpg,H100,Washing Up Liquid 500ml x12,20,7.20,144.00
+invoice_08.jpg,H114,Laundry Capsules 60 wash,15,9.85,147.75
+invoice_08.jpg,H207,Toilet Tissue 36 roll,18,11.30,203.40
+invoice_08.jpg,H220,Bleach 1L x12,8,8.40,67.20
+invoice_08.jpg,H315,Sponge Scourers 10 pack x10,6,6.15,36.90
+invoice_08.jpg,H402,Dishwasher Tablets 80 pack,10,8.95,89.50
+invoice_09.jpg,,Cod Fillets 5kg box,6,38.50,231.00
+invoice_09.jpg,,Smoked Haddock 2kg,8,19.20,153.60
+invoice_09.jpg,,Salmon Fillets 3kg box,5,44.90,224.50
+invoice_09.jpg,,King Prawns 1kg,12,13.75,165.00
+invoice_10.pdf,S01,Ground Cumin 1kg,10,9.40,94.00
+invoice_10.pdf,S02,Turmeric Powder 1kg,10,7.85,78.50
+invoice_10.pdf,S03,Chilli Flakes 500g,8,6.30,50.40
+invoice_10.pdf,S04,Black Pepper Ground 1kg,6,12.60,75.60

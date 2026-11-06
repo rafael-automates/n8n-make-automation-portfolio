@@ -1,0 +1,11 @@
+file,supplier,invoice_number,invoice_date_iso,currency,subtotal,discount,vat,total_printed,line_sum_check,notes
+invoice_01.pdf,Greenvale Fresh Produce Ltd,GFP-20457,2026-10-14,GBP,226.25,0.00,0.00,226.25,OK,"Clean PDF, zero VAT"
+invoice_02.pdf,Northfield Dairy Co-operative,ND/88213,2026-10-21,GBP,562.55,0.00,0.00,562.55,OK,Date written as 2026-10-21; column named Cases
+invoice_03.pdf,Harbour Street Bakery Supplies,HSB-5519,2026-10-19,GBP,208.36,0.00,41.67,250.03,OK,"Date as 'Oct 19, 2026'; no product codes"
+invoice_04.pdf,Bluebell Beverages Wholesale,BB-2026-3318,2026-10-23,GBP,1156.70,57.84,219.77,1318.63,OK,UK date 23/10/2026; 5% trade discount before VAT
+invoice_05.pdf,Kestrel Cash & Carry,KCC-0094127,2026-10-12,GBP,1116.40,0.00,223.28,1339.68,OK,"Dense 12-line invoice, small print"
+invoice_06.pdf,Saffron Lane Imports,SLI/2610/042,2026-10-03,EUR,864.60,0.00,0.00,864.60,OK,Currency is EUR; Courier font; zero VAT
+invoice_07.jpg,Marlowe Frozen Foods Ltd,MFF-71204,2026-10-16,GBP,317.80,0.00,0.00,317.80,OK,"Photo, slight tilt"
+invoice_08.jpg,Pennant Household Goods,PHG-30981,2026-10-20,GBP,688.75,0.00,137.75,826.50,OK,"Photo, tilted and blurred"
+invoice_09.jpg,Tidewater Fish Merchants,TFM-4402,2026-10-22,GBP,774.10,0.00,0.00,774.10,OK,"Poor photo: heavy tilt, dark, noisy, no product codes"
+invoice_10.pdf,Oakhurst Spice Traders,OST-1187,2026-10-25,GBP,298.50,0.00,59.70,370.20,MISMATCH,"PRINTED TOTAL IS WRONG: it is 12.00 higher than the lines add up to. The system should flag this for review, not accept it silently"
