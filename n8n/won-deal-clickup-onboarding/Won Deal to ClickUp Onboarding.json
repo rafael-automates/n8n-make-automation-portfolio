@@ -1,0 +1,286 @@
+{
+  "name": "Won Deal to ClickUp Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "action": "change",
+        "entity": "deal"
+      },
+      "type": "n8n-nodes-base.pipedriveTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        -272
+      ],
+      "id": "4ffef975-3f1d-4d12-adfa-dcc373a5f227",
+      "name": "Pipedrive Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7b8880b8-9f79-4a3f-893a-ff5fd280930a",
+              "leftValue": "={{ $json.data.won_time }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "09071c8f-4ab8-4702-99eb-44d42b80492c",
+              "leftValue": "={{ $json.previous.won_time }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ead083f6-00db-4024-afd8-901b7dbb39a6",
+              "leftValue": "={{ $json.data.won_time }}",
+              "rightValue": "={{ $json.data.first_won_time }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -464,
+        -272
+      ],
+      "id": "0be8ee76-75d4-4ac6-bd4a-c2f174dbc697",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "get",
+        "organizationId": "={{ $json.data.org_id }}"
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -448
+      ],
+      "id": "17424ab1-4e93-463f-95a1-f35339cf75c6",
+      "name": "Get an organization",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const client = $('Get an organization').first().json.name;\n\nconst tasks = [\n  { t: 'Send welcome email and intake questionnaire', days: 1 },\n  { t: 'Collect brand assets and guidelines', days: 3 },\n  { t: 'Confirm account and tool access', days: 3 },\n  { t: 'Schedule kickoff call', days: 5 },\n  { t: 'Confirm scope and timeline', days: 7 }\n];\n\nreturn tasks.map(x => ({ json: { name: `${x.t} - ${client}`, days: x.days } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -448
+      ],
+      "id": "a3bcbd55-1d15-49b1-9957-5decd04436e3",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "team": "1300400000012293",
+        "space": "1300400000060915",
+        "folder": "={{ $('Create a folder').first().json.id }}",
+        "list": "={{ $('Create a list').item.json.id }}",
+        "name": "={{ $json.name }}",
+        "additionalFields": {
+          "assignees": [
+            246272450
+          ],
+          "dueDate": "={{ $now.plus({ days: $json.days }).toISO() }}",
+          "priority": 3
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -448
+      ],
+      "id": "4082c9f4-199e-45c9-bd7b-03565a1f087c",
+      "name": "Create a task",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "clickUpApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "team": "1300400000012293",
+        "space": "1300400000060915",
+        "name": "={{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -448
+      ],
+      "id": "484effd3-834b-4407-9e00-4505947ffa22",
+      "name": "Create a folder",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "clickUpApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "list",
+        "operation": "create",
+        "team": "1300400000012293",
+        "space": "1300400000060915",
+        "folder": "={{ $json.id }}",
+        "name": "Onboarding",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -448
+      ],
+      "id": "945d412e-c541-4ab4-8dc0-f8f9ed2cdbb7",
+      "name": "Create a list",
+      "retryOnFail": false,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "clickUpApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Pipedrive Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get an organization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an organization": {
+      "main": [
+        [
+          {
+            "node": "Create a folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a folder": {
+      "main": [
+        [
+          {
+            "node": "Create a list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a list": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "k8mEeaeuF5xn3RA9",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "e30cab50-5495-4971-bbe5-8795220d5224",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "WLTTrwc0SRDnGRfl",
+  "tags": []
+}
