@@ -1,0 +1,520 @@
+{
+  "name": "Invoice Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Invoice Upload",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Invoice",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        48,
+        -480
+      ],
+      "id": "43653ed2-b265-4b6a-ad2c-5e09dae3345a",
+      "name": "On form submission",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "text": "Extract this supplier invoice. Return ONLY valid JSON with no markdown and no explanation, using exactly this structure:\n{\"supplier\":\"\",\"invoice_number\":\"\",\"invoice_date\":\"YYYY-MM-DD\",\"currency\":\"GBP\",\"subtotal\":0,\"discount\":0,\"vat\":0,\"total\":0,\"line_items\":[{\"product_code\":\"\",\"product\":\"\",\"quantity\":0,\"unit_cost\":0,\"line_total\":0}]}\nRules: copy the figures printed on the invoice and do not calculate or correct them. Read dates as day/month/year. Use null for anything not visible. Write numbers without currency symbols or thousands separators. The discount is a positive number.",
+        "inputType": "binary",
+        "binaryPropertyName": "Invoice",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        -480
+      ],
+      "id": "54225c6a-290b-42f6-9be8-fae833dad4aa",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $input.item.json.content.parts[0].text;\nconst fileName = $('On form submission').item.binary?.Invoice?.fileName ?? '';\nlet data;\nconst reasons = [];\n\ntry {\n  data = JSON.parse(raw.replace(/```json|```/g, '').trim());\n} catch (e) {\n  return { json: { file: fileName, needs_review: true, review_reasons: 'Model output was not valid JSON', raw } };\n}\n\nconst num = v => (v === null || v === undefined || v === '' ? 0 : Number(v));\ndata.discount = num(data.discount);\ndata.vat = num(data.vat);\nconst lines = Array.isArray(data.line_items) ? data.line_items : [];\nif (!lines.length) reasons.push('No line items found');\n\nlet sum = 0;\nfor (const l of lines) {\n  const calc = Math.round(num(l.quantity) * num(l.unit_cost) * 100) / 100;\n  if (Math.abs(calc - num(l.line_total)) > 0.01) reasons.push(`Line \"${l.product}\" does not add up`);\n  sum += num(l.line_total);\n}\nsum = Math.round(sum * 100) / 100;\n\nconst expected = Math.round((sum - num(data.discount) + num(data.vat)) * 100) / 100;\nif (Math.abs(expected - num(data.total)) > 0.01) {\n  reasons.push(`Printed total ${num(data.total)} does not match lines (${expected})`);\n}\n\nfor (const f of ['supplier', 'invoice_number', 'invoice_date', 'currency', 'total']) {\n  if (data[f] === null || data[f] === undefined || data[f] === '') reasons.push(`Missing ${f}`);\n}\n\nreturn { json: { file: fileName, ...data, lines_sum: sum, expected_total: expected, needs_review: reasons.length > 0, review_reasons: reasons.join('; ') } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -256
+      ],
+      "id": "dc269926-3e9c-4f17-8ae7-762b2a3a4948",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us",
+          "mode": "list",
+          "cachedResultName": "Invoice Extractor Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "File": "={{ $json.file }}",
+            "Supplier": "={{ $json.supplier }}",
+            "Invoice Number ": "={{ $json.invoice_number }}",
+            "Invoice Date ": "={{ $json.invoice_date }}",
+            "Currency ": "={{ $json.currency }}",
+            "Subtotal": "={{ $json.subtotal }}",
+            "Discount": "={{ $json.discount }}",
+            "VAT": "={{ $json.vat }}",
+            "Total ": "={{ $json.total }}",
+            "Lines Sum": "={{ $json.lines_sum }}",
+            "Expected Total": "={{ $json.expected_total }}",
+            "Needs Review": "={{ $json.needs_review }}",
+            "Review Reasons": "={{ $json.review_reasons }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Supplier",
+              "displayName": "Supplier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number ",
+              "displayName": "Invoice Number ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date ",
+              "displayName": "Invoice Date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency ",
+              "displayName": "Currency ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subtotal",
+              "displayName": "Subtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Discount",
+              "displayName": "Discount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VAT",
+              "displayName": "VAT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total ",
+              "displayName": "Total ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lines Sum",
+              "displayName": "Lines Sum",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expected Total",
+              "displayName": "Expected Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Needs Review",
+              "displayName": "Needs Review",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Review Reasons",
+              "displayName": "Review Reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        -112
+      ],
+      "id": "1139f3d7-4108-42d7-b09b-77255804fe20",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "95882d84-95df-4336-9fb7-c3fef39a454f",
+              "leftValue": "={{ $json.needs_review }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        -256
+      ],
+      "id": "d73acca4-93b8-4c2c-85b3-8f75a320d010",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "=YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⚠️ Invoice needs review\nFile: {{ $json.file }}\nSupplier: {{ $json.supplier }}\nReason: {{ $json.review_reasons }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        -448
+      ],
+      "id": "a762a612-5d50-483f-a329-5b70dafe0f85",
+      "name": "Send a text message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "line_items",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        80,
+        64
+      ],
+      "id": "c2af5511-ad8b-4306-8857-06e69747dd69",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us",
+          "mode": "list",
+          "cachedResultName": "Invoice Extractor Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 920363656,
+          "mode": "list",
+          "cachedResultName": "Line Items",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us/edit#gid=920363656"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "File": "={{ $json.file }}",
+            "Product Code": "={{ $json.line_items.product_code }}",
+            "Product": "={{ $json.line_items.product }}",
+            "Quantity": "={{ $json.line_items.quantity }}",
+            "Unit Cost": "={{ $json.line_items.unit_cost }}",
+            "Line Total": "={{ $json.line_items.line_total }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product Code",
+              "displayName": "Product Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Unit Cost",
+              "displayName": "Unit Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Line Total",
+              "displayName": "Line Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        288,
+        64
+      ],
+      "id": "e32b05fd-c115-41fc-80f5-4acbe4172c89",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        []
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "k8mEeaeuF5xn3RA9",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "153a20c3-3b6c-4199-b22e-9682218e6b4b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "nodeGroups": [],
+  "id": "P4B7N0RBr8hdh9wb",
+  "tags": []
+}
