@@ -13,6 +13,7 @@ Portfolio projects built for simulated clients (not paid client work). Each buil
 | [AI Real Estate Inquiry Triage Agent](make/ai-inquiry-triage) | Make, Gmail, Groq, Google Sheets, Slack | Tested with sample inquiry emails |
 | [Invoice Extractor](n8n/invoice-extractor) | n8n, Gemini API, Google Sheets, Telegram | Tested on 10 fake invoices |
 | [Client Onboarding Automation](make/client-onboarding) | Make, Google Forms, Drive, Docs, Gmail, Calendar, Groq | Tested with test submissions |
+| [Xero Invoice Check](n8n/xero-invoice-check) | n8n, Xero API (OAuth2, demo company), Google Sheets, Telegram | Demo company with seeded test bills |
 
 Other Make scenarios (lead follow-up, invoice intake, AI inquiry triage, dashboard) are described in the case study PDFs: https://drive.google.com/drive/folders/1n9clnJjOrgrulIw-aEedwhg27_hazmpA?usp=sharing
 
