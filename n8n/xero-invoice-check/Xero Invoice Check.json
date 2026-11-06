@@ -1,0 +1,337 @@
+{
+  "name": "Xero Invoice Check",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "435bad40-3299-4411-8a7f-2d45b347b711",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us",
+          "mode": "list",
+          "cachedResultName": "Invoice Extractor Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        0
+      ],
+      "id": "ebf56663-63a1-4ffe-9bcf-08383833d7b7",
+      "name": "Invoices Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "organizationId": "f03ac293-6816-4997-bbad-31968bccf75c",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xero",
+      "typeVersion": 1,
+      "position": [
+        368,
+        0
+      ],
+      "id": "be95c9e4-6d4f-4359-b159-6bd1e525bd3d",
+      "name": "Xero Bills",
+      "executeOnce": true,
+      "credentials": {
+        "xeroOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const norm = s => String(s ?? '').trim().toUpperCase().replace(/\\s+/g, '');\nconst field = (row, name) => {\n  for (const k of Object.keys(row)) {\n    if (k.trim().toLowerCase() === name.toLowerCase()) return row[k];\n  }\n  return undefined;\n};\n\nconst sheetRows = $('Invoices Sheet').all().map(i => i.json);\nconst bills = $('Xero Bills').all().map(i => i.json).filter(b => b.Type === 'ACCPAY');\n\nconst byNumber = {};\nfor (const b of bills) {\n  const key = norm(b.InvoiceNumber);\n  if (!key) continue;\n  (byNumber[key] = byNumber[key] || []).push(b);\n}\n\nconst out = [];\nfor (const r of sheetRows) {\n  const file = field(r, 'File');\n  const supplier = field(r, 'Supplier');\n  const number = field(r, 'Invoice Number');\n  const total = Number(field(r, 'Total'));\n  const matches = byNumber[norm(number)] || [];\n  let status, xeroTotal = '', diff = '', note = '';\n\n  if (!norm(number) || Number.isNaN(total)) {\n    status = 'REVIEW'; note = 'Missing invoice number or total in the extractor row';\n  } else if (matches.length === 0) {\n    status = 'NOT FOUND'; note = 'No bill with this invoice number in Xero';\n  } else if (matches.length > 1) {\n    status = 'REVIEW'; note = 'More than one Xero bill has this invoice number';\n  } else {\n    const b = matches[0];\n    xeroTotal = Number(b.Total);\n    diff = Math.round((total - xeroTotal) * 100) / 100;\n    status = Math.abs(diff) <= 0.01 ? 'MATCH' : 'MISMATCH';\n    if (norm(b.Contact && b.Contact.Name) !== norm(supplier)) {\n      note = 'Supplier name differs: ' + (b.Contact && b.Contact.Name);\n    }\n  }\n  out.push({ json: { file, supplier, invoice_number: number, invoice_total: total, xero_total: xeroTotal, difference: diff, status, note } });\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "0cb87e28-a3c6-4677-abe5-5e4737450f3c",
+      "name": "Compare"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst rows = $input.all().map(i => i.json);\nconst count = s => rows.filter(r => r.status === s).length;\nconst lines = [`Xero check finished: ${count('MATCH')} match, ${count('MISMATCH')} mismatch, ${count('NOT FOUND')} not found, ${count('REVIEW')} need review.`];\nfor (const r of rows.filter(r => r.status === 'MISMATCH')) {\n  lines.push(`MISMATCH: ${esc(r.supplier)} ${esc(r.invoice_number)}: invoice ${r.invoice_total} vs Xero ${r.xero_total} (difference ${r.difference})`);\n}\nreturn [{ json: { text: lines.join('\\n') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        112
+      ],
+      "id": "0e93baca-6511-4868-9ae2-0fef710db58c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1P488vkSDARXmfRGU8MqH_c1EzapmIEWZVZqLfe6-4Us",
+          "mode": "list",
+          "cachedResultName": "Invoice Extractor Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1446180373,
+          "mode": "list",
+          "cachedResultName": "Xero Comparison",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Run Date": "={{ $now.setZone('Asia/Manila').toFormat('yyyy-MM-dd HH:mm') }}",
+            "File": "={{ $json.file }}",
+            "Supplier": "={{ $json.supplier }}",
+            "Invoice Number": "={{ $json.invoice_number }}",
+            "Invoice Total": "={{ $json.invoice_total }}",
+            "Xero Total": "={{ $json.xero_total }}",
+            "Difference": "={{ $json.difference }}",
+            "Status": "={{ $json.status }}",
+            "Note": "={{ $json.note }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Run Date",
+              "displayName": "Run Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "displayName": "File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Supplier",
+              "displayName": "Supplier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Total",
+              "displayName": "Invoice Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Xero Total",
+              "displayName": "Xero Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Difference",
+              "displayName": "Difference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        -112
+      ],
+      "id": "49b1373d-588d-451a-b822-cec757ba3720",
+      "name": "Xero Comparison",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        112
+      ],
+      "id": "6d5cb639-14c9-4d23-ba1a-5e4b9c0606de",
+      "name": "Send a text message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Invoices Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoices Sheet": {
+      "main": [
+        [
+          {
+            "node": "Xero Bills",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Xero Bills": {
+      "main": [
+        [
+          {
+            "node": "Compare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare": {
+      "main": [
+        [
+          {
+            "node": "Xero Comparison",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "k8mEeaeuF5xn3RA9",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "2dad1fe8-8572-469e-b0b2-4b3cf1f5e65b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "nodeGroups": [],
+  "id": "2akOFvJulfu0klp7",
+  "tags": []
+}
